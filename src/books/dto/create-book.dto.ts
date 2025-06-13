@@ -1,4 +1,7 @@
+import { IsNotEmpty, Length } from 'class-validator';
+
 export class CreateBookDto {
-  readonly id: string;
+  @IsNotEmpty()
+  @Length(3, 20)
   readonly title: string;
 }
