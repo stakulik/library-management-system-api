@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "authors" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
     "first_name" TEXT NOT NULL,
     "last_name" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -11,12 +11,12 @@ CREATE TABLE "authors" (
 
 -- CreateTable
 CREATE TABLE "books" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL,
-    "author_id" UUID NOT NULL,
+    "author_id" INTEGER NOT NULL,
 
     CONSTRAINT "books_pkey" PRIMARY KEY ("id")
 );
