@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Author {
+  id          String  @id @default(uuid()) @db.Uuid
+  firstName   String @map("first_name")
+  lastName    String @map("last_name")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  books       Book[]
+
+  @@map("authors")
+}
+
+model Book {
+  id              String  @id @default(uuid()) @db.Uuid
+  title           String
+  description     String?
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  authorId        String @map("author_id") @db.Uuid
+  author          Author   @relation(fields: [authorId], references: [id])
+
+  @@map("books")
+}
