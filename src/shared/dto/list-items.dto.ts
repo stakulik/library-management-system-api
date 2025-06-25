@@ -2,7 +2,7 @@ import { IsOptional, IsNumberString, IsEnum } from 'class-validator';
 
 import { ListDirection } from '../interfaces';
 
-export class ListAuthorsDto {
+export class ListItemsDto {
   @IsOptional()
   @IsNumberString({}, { message: 'cursor must be a number' })
   cursor?: string;

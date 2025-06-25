@@ -11,9 +11,11 @@ import {
 } from '@nestjs/common';
 import { Author } from '@prisma/client';
 
+import { ListItemsDto } from '../shared';
+
 import { ListAuthors } from './interfaces';
 import { AuthorsService } from './authors.service';
-import { CreateAuthorDto, ListAuthorsDto } from './dto';
+import { CreateAuthorDto } from './dto';
 
 @Controller('authors')
 export class AuthorsController {
@@ -25,7 +27,7 @@ export class AuthorsController {
   }
 
   @Get()
-  async listAll(@Query() query: ListAuthorsDto): Promise<ListAuthors> {
+  async listAll(@Query() query: ListItemsDto): Promise<ListAuthors> {
     return this.authorsService.listAll(query);
   }
 

@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
-import { IsNotEmpty, Length } from 'class-validator';
+import { IsNotEmpty, IsString, Length } from 'class-validator';
 
 export function NameField() {
-  return applyDecorators(IsNotEmpty(), Length(3, 20));
+  return applyDecorators(IsNotEmpty(), IsString(), Length(3, 20));
 }

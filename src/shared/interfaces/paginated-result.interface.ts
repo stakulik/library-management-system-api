@@ -1,7 +1,5 @@
-import { Author } from '@prisma/client';
-
-export interface ListAuthors {
-  data: Author[];
+export interface PaginatedResult<M> {
+  data: M[];
   pagination: {
     hasNextPage: boolean;
     hasPreviousPage: boolean;
