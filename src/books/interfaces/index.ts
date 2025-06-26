@@ -1,1 +1,1 @@
-export * from './book.interface';
+export * from './list-books';

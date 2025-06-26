@@ -1,18 +1,37 @@
 import { Injectable } from '@nestjs/common';
+import { Book } from '@prisma/client';
 
-import { Book } from './interfaces';
+import { PrismaService } from '../prisma';
+import { ListItemsDto, listPaginated } from '../shared';
+
+import { CreateBookDto } from './dto';
+import { ListBooks } from './interfaces';
 
 @Injectable()
 export class BooksService {
-  private readonly books: Book[] = [];
+  constructor(private prisma: PrismaService) {}
 
-  create(book: Book): Promise<Book | null> {
-    this.books.push(book);
-
-    return Promise.resolve(book);
+  async create(book: CreateBookDto): Promise<Book> {
+    return this.prisma.book.create({ data: book });
   }
 
-  findAll(): Promise<Book[]> {
-    return Promise.resolve(this.books);
+  async listAll(listBooksDto: ListItemsDto): Promise<ListBooks> {
+    return listPaginated<Book>(listBooksDto, this.prisma.book);
+  }
+
+  async findOne(id: number) {
+    return this.prisma.book.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async delete(id: number): Promise<Book> {
+    return this.prisma.book.delete({
+      where: {
+        id,
+      },
+    });
   }
 }
