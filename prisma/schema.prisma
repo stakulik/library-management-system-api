@@ -29,7 +29,27 @@ model Book {
   authorId        Int @map("author_id")
   author          Author   @relation(fields: [authorId], references: [id])
 
+  reservations    Reservation[]
+
   @@map("books")
+}
+
+model Reservation {
+  id          Int               @id @default(autoincrement())
+  status      ReservationStatus @default(PENDING)
+  reservedAt  DateTime          @default(now()) @map("reserved_at") @db.Timestamptz
+  dueDate     DateTime          @map("due_date") @db.Timestamptz
+  returnedAt  DateTime?         @map("returned_at") @db.Timestamptz
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+
+  bookId      Int               @map("book_id")
+  book        Book              @relation(fields: [bookId], references: [id])
+
+  userId      Int               @map("user_id")
+  user        User              @relation(fields: [userId], references: [id])
+
+  @@map("reservations")
 }
 
 model User {
@@ -42,7 +62,16 @@ model User {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
+  reservations Reservation[]
+
   @@map("users")
+}
+
+enum ReservationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RETURNED
 }
 
 enum Role {
