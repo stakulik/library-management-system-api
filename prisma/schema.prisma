@@ -8,59 +8,59 @@ datasource db {
 }
 
 model Author {
-  id          Int @id @default(autoincrement())
-  firstName   String @map("first_name")
-  lastName    String @map("last_name")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  id        Int      @id @default(autoincrement())
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  books       Book[]
+  books Book[]
 
   @@map("authors")
 }
 
 model Book {
-  id              Int @id @default(autoincrement())
-  title           String
-  description     String?
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  authorId        Int @map("author_id")
-  author          Author   @relation(fields: [authorId], references: [id])
+  authorId Int    @map("author_id")
+  author   Author @relation(fields: [authorId], references: [id])
 
-  reservations    Reservation[]
+  reservations Reservation[]
 
   @@map("books")
 }
 
 model Reservation {
-  id          Int               @id @default(autoincrement())
-  status      ReservationStatus @default(PENDING)
-  reservedAt  DateTime          @default(now()) @map("reserved_at") @db.Timestamptz
-  dueDate     DateTime          @map("due_date") @db.Timestamptz
-  returnedAt  DateTime?         @map("returned_at") @db.Timestamptz
-  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+  id         Int               @id @default(autoincrement())
+  status     ReservationStatus @default(PENDING)
+  reservedAt DateTime          @default(now()) @map("reserved_at") @db.Timestamptz
+  dueDate    DateTime          @map("due_date") @db.Timestamptz
+  returnedAt DateTime?         @map("returned_at") @db.Timestamptz
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime          @updatedAt @map("updated_at") @db.Timestamptz
 
-  bookId      Int               @map("book_id")
-  book        Book              @relation(fields: [bookId], references: [id])
+  bookId Int  @map("book_id")
+  book   Book @relation(fields: [bookId], references: [id])
 
-  userId      Int               @map("user_id")
-  user        User              @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id])
 
   @@map("reservations")
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  email       String   @unique
-  firstName   String   @map("first_name")
-  lastName    String   @map("last_name")
-  password    String
-  role        Role     @default(USER)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   reservations Reservation[]
 
