@@ -31,3 +31,21 @@ model Book {
 
   @@map("books")
 }
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  firstName   String   @map("first_name")
+  lastName    String   @map("last_name")
+  password    String
+  role        Role     @default(USER)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
