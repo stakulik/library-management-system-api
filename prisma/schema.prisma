@@ -58,6 +58,7 @@ model User {
   firstName String   @map("first_name")
   lastName  String   @map("last_name")
   password  String
+  refreshToken String? @map("refresh_token")
   role      Role     @default(USER)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
