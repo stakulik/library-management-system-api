@@ -1,6 +1,6 @@
 import { EmailField, NameField, PasswordField } from '../../common';
 
-export class CreateUserDto {
+export class RegisterDto {
   @EmailField()
   readonly email: string;
 
