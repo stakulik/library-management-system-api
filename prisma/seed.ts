@@ -1,5 +1,6 @@
 import { PrismaClient, Role, ReservationStatus } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+
+import { hashPassword } from '../src/shared';
 
 const prisma = new PrismaClient();
 
@@ -48,7 +49,7 @@ async function main() {
         email: 'alice@example.com',
         firstName: 'Alice',
         lastName: 'Reader',
-        password: await bcrypt.hash('password123', 10),
+        password: await hashPassword('password123'),
         role: Role.USER,
       },
     }),
@@ -57,7 +58,7 @@ async function main() {
         email: 'admin@example.com',
         firstName: 'Bob',
         lastName: 'Librarian',
-        password: await bcrypt.hash('admin123', 10),
+        password: await hashPassword('admin123'),
         role: Role.ADMIN,
       },
     }),
