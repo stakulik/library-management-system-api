@@ -1,6 +1,6 @@
 import { PrismaClient, Role, ReservationStatus } from '@prisma/client';
 
-import { hashPassword } from '../src/shared';
+import { getHash } from '../src/shared';
 
 const prisma = new PrismaClient();
 
@@ -49,7 +49,7 @@ async function main() {
         email: 'alice@example.com',
         firstName: 'Alice',
         lastName: 'Reader',
-        password: await hashPassword('password123'),
+        password: await getHash('password123'),
         role: Role.USER,
       },
     }),
@@ -58,7 +58,7 @@ async function main() {
         email: 'admin@example.com',
         firstName: 'Bob',
         lastName: 'Librarian',
-        password: await hashPassword('admin123'),
+        password: await getHash('admin123'),
         role: Role.ADMIN,
       },
     }),

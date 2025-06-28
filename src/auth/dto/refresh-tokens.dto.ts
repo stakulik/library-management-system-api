@@ -1,9 +1,9 @@
 import { IsInt, IsString, IsNotEmpty } from 'class-validator';
 
-export class UpdateRefreshTokenDto {
+export class RefreshTokensDto {
   @IsString()
   @IsNotEmpty()
-  readonly refreshToken: string | null;
+  readonly refreshToken: string;
 
   @IsInt()
   @IsNotEmpty()

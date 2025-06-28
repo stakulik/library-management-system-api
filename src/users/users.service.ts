@@ -1,9 +1,8 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { Prisma, User } from '@prisma/client';
 
 import { PrismaService } from '../prisma';
-import { hashPassword, ListItemsDto, listPaginated } from '../shared';
+import { compareHashes, getHash, ListItemsDto, listPaginated } from '../shared';
 
 import { ListUsers } from './interfaces';
 import {
@@ -16,18 +15,19 @@ import {
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(user: CreateUserDto): Promise<User> {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: user.email },
-    });
+  async create(
+    user: CreateUserDto,
+    tx: Prisma.TransactionClient,
+  ): Promise<User> {
+    const existingUser = await this.findByEmail(user.email, tx);
 
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
-    const hashedPassword = await hashPassword(user.password);
+    const hashedPassword = await getHash(user.password);
 
-    return this.prisma.user.create({
+    return tx.user.create({
       data: {
         ...user,
         password: hashedPassword,
@@ -43,18 +43,18 @@ export class UsersService {
     });
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: { email },
-    });
+  async findByEmail(
+    email: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<User | null> {
+    return (tx ?? this.prisma).user.findUnique({ where: { email } });
   }
 
-  async findOne(id: number): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
+  async findOne(
+    id: number,
+    tx?: Prisma.TransactionClient,
+  ): Promise<User | null> {
+    return (tx ?? this.prisma).user.findUnique({ where: { id } });
   }
 
   async listAll(listUsersDto: ListItemsDto): Promise<ListUsers> {
@@ -63,12 +63,13 @@ export class UsersService {
 
   async updateRefreshToken(
     updateRefreshTokenDto: UpdateRefreshTokenDto,
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
     const hashedToken = updateRefreshTokenDto.refreshToken
-      ? await hashPassword(updateRefreshTokenDto.refreshToken)
+      ? await getHash(updateRefreshTokenDto.refreshToken)
       : null;
 
-    await this.prisma.user.update({
+    await (tx ?? this.prisma).user.update({
       where: { id: updateRefreshTokenDto.userId },
       data: { refreshToken: hashedToken },
     });
@@ -76,12 +77,13 @@ export class UsersService {
 
   async validateRefreshToken(
     validateRefreshTokenDto: ValidateRefreshTokenDto,
+    tx: Prisma.TransactionClient,
   ): Promise<boolean> {
-    const user = await this.findOne(validateRefreshTokenDto.userId);
+    const user = await this.findOne(validateRefreshTokenDto.userId, tx);
 
     if (user?.refreshToken) {
-      return bcrypt.compare(
-        validateRefreshTokenDto.refreshToken,
+      return compareHashes(
+        validateRefreshTokenDto.refreshToken!,
         user.refreshToken,
       );
     }
