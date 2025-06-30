@@ -6,15 +6,19 @@ import {
   Param,
   ParseIntPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 
-import { ListItemsDto } from '../shared';
+import { ListItemsDto, Roles, UserRole } from '../shared';
+import { RolesGuard } from '../common';
 
 import { ListUsers } from './interfaces';
 import { UsersService } from './users.service';
 
 @Controller('users')
+@Roles(UserRole.Admin)
+@UseGuards(RolesGuard)
 export class UsersController {
   constructor(private readonly UsersService: UsersService) {}
 

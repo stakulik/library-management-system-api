@@ -8,10 +8,12 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { Author } from '@prisma/client';
 
-import { ListItemsDto } from '../shared';
+import { ListItemsDto, Roles, UserRole } from '../shared';
+import { RolesGuard } from '../common';
 
 import { ListAuthors } from './interfaces';
 import { AuthorsService } from './authors.service';
@@ -22,17 +24,23 @@ export class AuthorsController {
   constructor(private readonly authorsService: AuthorsService) {}
 
   @Post()
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
   async create(@Body() createAuthorDto: CreateAuthorDto): Promise<Author> {
     return this.authorsService.create(createAuthorDto);
   }
 
-  @Get()
-  async listAll(@Query() query: ListItemsDto): Promise<ListAuthors> {
-    return this.authorsService.listAll(query);
+  @Delete(':id')
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
+  async delete(@Param('id', new ParseIntPipe()) id: number): Promise<Author> {
+    return this.authorsService.delete(id);
   }
 
   @Get(':id')
-  async findOne(@Param('id', new ParseIntPipe()) id: number) {
+  async findOne(
+    @Param('id', new ParseIntPipe()) id: number,
+  ): Promise<Author | null> {
     const author = await this.authorsService.findOne(id);
 
     if (!author) {
@@ -42,8 +50,8 @@ export class AuthorsController {
     return author;
   }
 
-  @Delete(':id')
-  async delete(@Param('id', new ParseIntPipe()) id: number): Promise<Author> {
-    return this.authorsService.delete(id);
+  @Get()
+  async listAll(@Query() query: ListItemsDto): Promise<ListAuthors> {
+    return this.authorsService.listAll(query);
   }
 }

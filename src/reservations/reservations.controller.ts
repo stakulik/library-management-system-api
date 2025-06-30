@@ -8,10 +8,12 @@ import {
   ParseIntPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { Reservation } from '@prisma/client';
 
-import { ListItemsDto } from '../shared';
+import { ListItemsDto, Roles, UserRole } from '../shared';
+import { RolesGuard } from '../common';
 
 import { ListReservations } from './interfaces';
 import { ReservationsService } from './reservations.service';
@@ -28,13 +30,17 @@ export class ReservationsController {
     return this.reservationsService.create(createReservationDto);
   }
 
-  @Get()
-  async listAll(@Query() query: ListItemsDto): Promise<ListReservations> {
-    return this.reservationsService.listAll(query);
+  @Delete(':id')
+  async delete(
+    @Param('id', new ParseIntPipe()) id: number,
+  ): Promise<Reservation> {
+    return this.reservationsService.delete(id);
   }
 
   @Get(':id')
-  async findOne(@Param('id', new ParseIntPipe()) id: number) {
+  async findOne(
+    @Param('id', new ParseIntPipe()) id: number,
+  ): Promise<Reservation | null> {
     const reservation = await this.reservationsService.findOne(id);
 
     if (!reservation) {
@@ -44,10 +50,10 @@ export class ReservationsController {
     return reservation;
   }
 
-  @Delete(':id')
-  async delete(
-    @Param('id', new ParseIntPipe()) id: number,
-  ): Promise<Reservation> {
-    return this.reservationsService.delete(id);
+  @Get()
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
+  async listAll(@Query() query: ListItemsDto): Promise<ListReservations> {
+    return this.reservationsService.listAll(query);
   }
 }
