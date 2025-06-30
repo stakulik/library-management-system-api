@@ -8,6 +8,7 @@ import { BooksModule } from './books';
 import { PrismaModule } from './prisma';
 import { ReservationsModule } from './reservations';
 import { UsersModule } from './users';
+import { RolesGuard } from './common';
 
 @Module({
   imports: [
@@ -25,6 +26,10 @@ import { UsersModule } from './users';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })
