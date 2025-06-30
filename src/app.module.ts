@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
-import { AuthModule } from './auth';
+import { AuthModule, JwtAuthGuard } from './auth';
 import { AuthorsModule } from './authors';
 import { BooksModule } from './books';
 import { PrismaModule } from './prisma';
@@ -23,7 +21,11 @@ import { UsersModule } from './users';
     ReservationsModule,
     UsersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

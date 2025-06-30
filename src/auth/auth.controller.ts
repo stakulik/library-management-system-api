@@ -1,5 +1,7 @@
 import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
 
+import { Public } from '../shared';
+
 import { AuthService } from './auth.service';
 import {
   GetProfileResponseDto,
@@ -10,12 +12,13 @@ import {
   RegisterResponseDto,
   RefreshTokensResponseDto,
 } from './dto';
-import { JwtAuthGuard, JwtRefreshGuard } from './guards';
+import { JwtRefreshGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('register')
   async register(
     @Body() registerDto: RegisterDto,
@@ -23,6 +26,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Public()
   @Post('login')
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.login(loginDto);
@@ -38,13 +42,11 @@ export class AuthController {
   }
 
   @Get('profile')
-  @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req): Promise<GetProfileResponseDto> {
     return this.authService.getProfile(req.user.userId);
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
   async logout(@Req() req): Promise<LogoutResponseDto> {
     await this.authService.logout(req.user.userId);
 
