@@ -33,7 +33,9 @@ export class AuthorsController {
   @Delete(':id')
   @Roles(UserRole.Admin)
   @UseGuards(RolesGuard)
-  async delete(@Param('id', new ParseIntPipe()) id: number): Promise<Author> {
+  async delete(
+    @Param('id', new ParseIntPipe()) id: number,
+  ): Promise<Author | null> {
     return this.authorsService.delete(id);
   }
 
