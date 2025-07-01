@@ -23,7 +23,9 @@ export class UsersController {
   constructor(private readonly UsersService: UsersService) {}
 
   @Delete(':id')
-  async delete(@Param('id', new ParseIntPipe()) id: number): Promise<User> {
+  async delete(
+    @Param('id', new ParseIntPipe()) id: number,
+  ): Promise<User | null> {
     return this.UsersService.delete(id);
   }
 

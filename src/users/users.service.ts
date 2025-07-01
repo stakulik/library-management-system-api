@@ -35,12 +35,14 @@ export class UsersService {
     });
   }
 
-  async delete(id: number): Promise<User> {
-    return this.prisma.user.delete({
-      where: {
-        id,
-      },
-    });
+  async delete(id: number): Promise<User | null> {
+    const user = await this.findOne(id);
+
+    if (!user) {
+      return null;
+    }
+
+    return this.prisma.user.delete({ where: { id } });
   }
 
   async findByEmail(
