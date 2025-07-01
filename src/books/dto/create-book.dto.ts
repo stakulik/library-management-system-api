@@ -18,7 +18,7 @@ export class CreateBookDto {
   readonly description?: string;
 
   @IsNotEmpty()
+  @IsInt({ message: 'authorId must be an integer' })
   @Type(() => Number)
-  @IsInt()
   readonly authorId: number;
 }

@@ -15,11 +15,17 @@ export class BooksService {
     return this.prisma.book.create({ data: book });
   }
 
-  async listAll(listBooksDto: ListItemsDto): Promise<ListBooks> {
-    return listPaginated<Book>(listBooksDto, this.prisma.book);
+  async delete(id: number): Promise<Book | null> {
+    const book = await this.findOne(id);
+
+    if (!book) {
+      return null;
+    }
+
+    return this.prisma.book.delete({ where: { id } });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Book | null> {
     return this.prisma.book.findUnique({
       where: {
         id,
@@ -27,11 +33,7 @@ export class BooksService {
     });
   }
 
-  async delete(id: number): Promise<Book> {
-    return this.prisma.book.delete({
-      where: {
-        id,
-      },
-    });
+  async listAll(listBooksDto: ListItemsDto): Promise<ListBooks> {
+    return listPaginated<Book>(listBooksDto, this.prisma.book);
   }
 }

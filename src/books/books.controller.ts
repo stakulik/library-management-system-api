@@ -33,7 +33,9 @@ export class BooksController {
   @Delete(':id')
   @Roles(UserRole.Admin)
   @UseGuards(RolesGuard)
-  async delete(@Param('id', new ParseIntPipe()) id: number): Promise<Book> {
+  async delete(
+    @Param('id', new ParseIntPipe()) id: number,
+  ): Promise<Book | null> {
     return this.booksService.delete(id);
   }
 
