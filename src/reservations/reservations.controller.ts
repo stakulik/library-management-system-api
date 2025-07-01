@@ -3,10 +3,11 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
+  Put,
+  Req,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -17,7 +18,7 @@ import { RolesGuard } from '../common';
 
 import { ListReservations } from './interfaces';
 import { ReservationsService } from './reservations.service';
-import { CreateReservationDto } from './dto';
+import { CreateReservationDto, UpdateReservationStatusDto } from './dto';
 
 @Controller('reservations')
 export class ReservationsController {
@@ -33,21 +34,11 @@ export class ReservationsController {
   @Delete(':id')
   async delete(
     @Param('id', new ParseIntPipe()) id: number,
-  ): Promise<Reservation> {
-    return this.reservationsService.delete(id);
-  }
-
-  @Get(':id')
-  async findOne(
-    @Param('id', new ParseIntPipe()) id: number,
+    @Req() req,
   ): Promise<Reservation | null> {
-    const reservation = await this.reservationsService.findOne(id);
+    const userId = req.user.id;
 
-    if (!reservation) {
-      throw new NotFoundException(`Reservation with id ${id} not found`);
-    }
-
-    return reservation;
+    return this.reservationsService.delete(id, userId);
   }
 
   @Get()
@@ -55,5 +46,30 @@ export class ReservationsController {
   @UseGuards(RolesGuard)
   async listAll(@Query() query: ListItemsDto): Promise<ListReservations> {
     return this.reservationsService.listAll(query);
+  }
+
+  @Get('my')
+  async listForUser(
+    @Req() req,
+    @Query() query: ListItemsDto,
+  ): Promise<ListReservations> {
+    const userId = req.user.id;
+
+    return this.reservationsService.listForUser({ ...query, userId });
+  }
+
+  @Put(':id/status')
+  async updateStatus(
+    @Param('id', new ParseIntPipe()) id: number,
+    @Body() updateStatusDto: UpdateReservationStatusDto,
+    @Req() req,
+  ): Promise<Reservation> {
+    const userId = req.user.id;
+
+    return this.reservationsService.updateStatus(
+      id,
+      userId,
+      updateStatusDto.status,
+    );
   }
 }

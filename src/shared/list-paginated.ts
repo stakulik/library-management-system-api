@@ -1,6 +1,7 @@
 import {
   ItemWithId,
   ListDirection,
+  ListPaginatedOptions,
   PaginatedResult,
   SortOrder,
 } from './interfaces';
@@ -10,6 +11,7 @@ import { ListItemsDto } from './dto';
 export const listPaginated = async <M extends ItemWithId>(
   listItemsDto: ListItemsDto,
   model,
+  options: ListPaginatedOptions = {},
 ): Promise<PaginatedResult<M>> => {
   const rawPageSize = listItemsDto.pageSize ?? defaultPageSize;
   const pageSize = Math.min(+rawPageSize, maxPageSize);
@@ -27,14 +29,19 @@ export const listPaginated = async <M extends ItemWithId>(
   let hasNextPage = false;
   let hasPreviousPage = false;
 
+  const baseArgs = {
+    ...(cursor && {
+      cursor: { id: cursor },
+      skip: 1,
+    }),
+    ...options,
+    orderBy: { id: SortOrder.Asc },
+  };
+
   if (direction === ListDirection.Forward) {
     items = await model.findMany({
+      ...baseArgs,
       take: pageSize + 1,
-      ...(cursor && {
-        cursor: { id: cursor },
-        skip: 1,
-      }),
-      orderBy: { id: SortOrder.Asc },
     });
 
     hasNextPage = items.length > pageSize;
@@ -46,12 +53,8 @@ export const listPaginated = async <M extends ItemWithId>(
     hasPreviousPage = !!cursor;
   } else {
     items = await model.findMany({
+      ...baseArgs,
       take: -(pageSize + 1),
-      ...(cursor && {
-        cursor: { id: cursor },
-        skip: 1,
-      }),
-      orderBy: { id: SortOrder.Asc },
     });
 
     hasPreviousPage = items.length > pageSize;
