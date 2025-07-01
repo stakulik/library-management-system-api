@@ -7,70 +7,65 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Start adding seeds');
 
-  await prisma.$transaction([
-    prisma.reservation.deleteMany(),
-    prisma.book.deleteMany(),
-    prisma.author.deleteMany(),
-    prisma.user.deleteMany(),
-  ]);
+  await prisma.reservation.deleteMany();
+  await prisma.book.deleteMany();
+  await prisma.author.deleteMany();
+  await prisma.user.deleteMany();
 
   // Authors
-  const [rowling, tolkien] = await prisma.$transaction([
-    prisma.author.create({
-      data: { firstName: 'J.K.', lastName: 'Rowling' },
-    }),
-    prisma.author.create({
-      data: { firstName: 'J.R.R.', lastName: 'Tolkien' },
-    }),
-  ]);
+  const author1 = await prisma.author.create({
+    data: { firstName: 'J.K.', lastName: 'Rowling' },
+  });
+
+  const author2 = await prisma.author.create({
+    data: { firstName: 'J.R.R.', lastName: 'Tolkien' },
+  });
 
   // Books
-  const [hp1, _lotr1] = await prisma.$transaction([
-    prisma.book.create({
-      data: {
-        title: "Harry Potter and the Philosopher's Stone",
-        description: 'The first book about Harry Potter',
-        authorId: rowling.id,
-      },
-    }),
-    prisma.book.create({
-      data: {
-        title: 'The Fellowship of the Ring',
-        description: 'The first part of "The Lord of the Rings"',
-        authorId: tolkien.id,
-      },
-    }),
-  ]);
+  const book1 = await prisma.book.create({
+    data: {
+      title: "Harry Potter and the Philosopher's Stone",
+      description: 'The first book about Harry Potter',
+      authorId: author1.id,
+    },
+  });
+
+  const _book2 = await prisma.book.create({
+    data: {
+      title: 'The Fellowship of the Ring',
+      description: 'The first part of "The Lord of the Rings"',
+      authorId: author2.id,
+    },
+  });
 
   // Users
-  const [alice, _admin] = await prisma.$transaction([
-    prisma.user.create({
-      data: {
-        email: 'alice@example.com',
-        firstName: 'Alice',
-        lastName: 'Reader',
-        password: await getHash('password123'),
-        role: Role.USER,
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: 'admin@example.com',
-        firstName: 'Bob',
-        lastName: 'Librarian',
-        password: await getHash('admin123'),
-        role: Role.ADMIN,
-      },
-    }),
-  ]);
+  const user1 = await prisma.user.create({
+    data: {
+      email: 'alice@example.com',
+      firstName: 'Alice',
+      lastName: 'Reader',
+      password: await getHash('password123'),
+      role: Role.USER,
+    },
+  });
+
+  const _admin = await prisma.user.create({
+    data: {
+      email: 'admin@example.com',
+      firstName: 'Bob',
+      lastName: 'Librarian',
+      password: await getHash('admin123'),
+      role: Role.ADMIN,
+    },
+  });
 
   // Reservations
   await prisma.reservation.create({
     data: {
       status: ReservationStatus.APPROVED,
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-      bookId: hp1.id,
-      userId: alice.id,
+      bookId: book1.id,
+      userId: user1.id,
     },
   });
 
