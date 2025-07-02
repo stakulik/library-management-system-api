@@ -1,98 +1,266 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Library Management System API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive RESTful API for managing a library system built with NestJS, Prisma, and PostgreSQL. This system provides full functionality for managing users, authors, books, and reservations with robust authentication and authorization.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Key Features
 
-## Description
+### Authentication & Authorization
+- **JWT-based authentication** with access and refresh tokens
+- **Role-based access control** (USER/ADMIN)
+- **Secure password hashing** with bcrypt
+- **Token refresh mechanism** for seamless user experience
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### User Management
+- User registration and profile management
+- Email-based user identification
+- Admin user management with full CRUD operations
+- User roles and permissions
 
-## Project setup
+### Library Resources
+- **Authors**: Complete author management with CRUD operations
+- **Books**: Book catalog with author relationships and detailed information
+- **Reservations**: Book reservation system with status tracking
 
-```bash
-$ yarn install
+### Advanced Features
+- **Cursor-based pagination** for efficient data retrieval
+- **Database indexing** for optimized performance
+- **Comprehensive validation** using class-validator
+- **Type-safe database operations** with Prisma ORM
+
+## Technology Stack
+
+### Backend Framework
+- **NestJS**: Modern Node.js framework with TypeScript
+- **TypeScript**: Static typing for enhanced developer experience
+- **Prisma ORM**: Next-generation database toolkit
+
+### Database
+- **PostgreSQL**: Robust relational database
+- **Database migrations**: Version-controlled schema changes
+- **Database indexing**: Optimized query performance
+
+### Security
+- **JWT**: JSON Web Tokens for stateless authentication
+- **bcrypt**: Password hashing and verification
+- **Passport.js**: Authentication middleware
+
+### Testing
+- **Jest**: Comprehensive testing framework
+- **Fishery**: Factory pattern for test data generation
+- **Database isolation**: Proper test environment setup
+
+### Development Tools
+- **ESLint**: Code linting and formatting
+- **Prettier**: Code formatting
+- **Docker Compose**: Containerized development environment
+
+## Database Schema
+
+### Core Entities
+
+```sql
+Users
+id (Primary Key)
+email (Unique)
+firstName
+lastName
+password (Hashed)
+refreshToken
+role (USER/ADMIN)
+timestamps
+
+Authors
+id (Primary Key)
+firstName
+lastName
+timestamps
+
+Books
+id (Primary Key)
+title
+description
+authorId (Foreign Key)
+timestamps
+
+Reservations
+id (Primary Key)
+status (PENDING/APPROVED/REJECTED/RETURNED)
+reservedAt
+dueDate
+returnedAt
+bookId (Foreign Key)
+userId (Foreign Key)
+timestamps
 ```
 
-## Compile and run the project
+## API Endpoints
 
+### Authentication
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/refresh` - Refresh tokens
+- `GET /auth/profile` - Get user profile
+- `POST /auth/logout` - User logout
+
+### Users (Admin only)
+- `GET /users` - List all users (paginated)
+- `GET /users/:id` - Get user by ID
+- `DELETE /users/:id` - Delete user
+
+### Authors
+- `GET /authors` - List all authors (paginated)
+- `GET /authors/:id` - Get author by ID
+- `POST /authors` - Create author (Admin only)
+- `DELETE /authors/:id` - Delete author (Admin only)
+
+### Books
+- `GET /books` - List all books (paginated)
+- `GET /books/:id` - Get book by ID
+- `POST /books` - Create book (Admin only)
+- `DELETE /books/:id` - Delete book (Admin only)
+
+### Reservations
+- `GET /reservations` - List all reservations (Admin only)
+- `GET /reservations/my` - List user's reservations
+- `POST /reservations` - Create reservation
+- `PUT /reservations/:id/status` - Update reservation status
+- `DELETE /reservations/:id` - Delete reservation
+
+## Installation & Setup
+
+### Prerequisites
+- Node.js (v18+)
+- PostgreSQL
+- Docker & Docker Compose (optional)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd library-management-system-api
+   ```
+
+2. **Install dependencies**
+   ```bash
+   yarn install
+   ```
+
+3. **Environment setup**
+   ```bash
+   cp .env.example .env
+   cp .env.test.example .env.test
+   ```
+
+4. **Database setup**
+   ```bash
+   # Start PostgreSQL with Docker
+   docker-compose up -d
+   
+   # Run migrations
+   yarn migrate
+   
+   # Seed database (optional)
+   yarn db:seed
+   ```
+
+5. **Start the application**
+   ```bash
+   # Development
+   yarn start:dev
+   
+   # Production
+   yarn build
+   yarn start:prod
+   ```
+
+## Testing
+
+The project includes comprehensive testing with 92 test cases covering all major functionality.
+
+### Test Categories
+- **Unit Tests**: Service and controller layer testing
+- **Integration Tests**: Database integration with real Prisma client
+- **Authentication Tests**: JWT token handling and security
+- **Pagination Tests**: Cursor-based pagination functionality
+
+### Running Tests
 ```bash
-# development
-$ yarn run start
+# Run all tests
+yarn test
 
-# watch mode
-$ yarn run start:dev
+# Watch mode
+yarn test:watch
 
-# production mode
-$ yarn run start:prod
+# Coverage report
+yarn test:cov
+
+# Test database setup
+yarn test:db:recreate
 ```
 
-## Run tests
+### Test Infrastructure
+- **Factory Pattern**: Consistent test data generation
+- **Database Cleanup**: Isolated test environment
+- **Sequence Reset**: Proper ID management between tests
+- **Serial Execution**: Prevents database conflicts
+
+## Development Commands
 
 ```bash
-# unit tests
-$ yarn run test
+# Database operations
+yarn migrate              # Run database migrations
+yarn migrate:reset        # Reset database
+yarn db:seed              # Seed database with sample data
 
-# e2e tests
-$ yarn run test:e2e
+# Development
+yarn start:dev            # Start in development mode
+yarn start:debug          # Start with debugger
+yarn lint                 # Lint and fix code
+yarn format               # Format code with Prettier
 
-# test coverage
-$ yarn run test:cov
+# Testing
+yarn test                 # Run all tests
+yarn test:e2e             # Run end-to-end tests
+yarn test:db:recreate     # Recreate test database
+
+# Build
+yarn build                # Build for production
 ```
 
-## Deployment
+## Architecture
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+### Modular Structure
+```
+src/
+  auth/           # Authentication module
+  users/          # User management
+  authors/        # Author management  
+  books/          # Book catalog
+  reservations/   # Reservation system
+  shared/         # Shared utilities
+  common/         # Common guards/decorators
+  prisma/         # Database service
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Design Patterns
+- **Module Pattern**: Feature-based organization
+- **Repository Pattern**: Database abstraction with Prisma
+- **Factory Pattern**: Test data generation
+- **Decorator Pattern**: Custom decorators for roles
+- **Guard Pattern**: Route protection and authorization
 
-## Resources
+## Security Features
 
-Check out a few resources that may come in handy when working with NestJS:
+- **Password Encryption**: bcrypt with salt rounds
+- **JWT Security**: Access and refresh token strategy
+- **Input Validation**: Comprehensive DTO validation
+- **SQL Injection Prevention**: Prisma ORM protection
+- **Role-based Access**: Admin/User permission system
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Performance Optimizations
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **Database Indexing**: Strategic indexes on foreign keys
+- **Cursor Pagination**: Efficient large dataset handling
+- **Connection Pooling**: Optimized database connections
+- **Lazy Loading**: Efficient relationship loading
