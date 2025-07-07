@@ -51,8 +51,8 @@ model Reservation {
   user   User @relation(fields: [userId], references: [id])
 
   @@map("reservations")
-  @@index([bookId])
   @@index([userId])
+  @@index([bookId, userId, status])
 }
 
 model User {

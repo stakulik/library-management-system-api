@@ -27,8 +27,11 @@ export class ReservationsController {
   @Post()
   async create(
     @Body() createReservationDto: CreateReservationDto,
+    @Req() req,
   ): Promise<Reservation> {
-    return this.reservationsService.create(createReservationDto);
+    const userId = req.user.userId;
+
+    return this.reservationsService.create(createReservationDto, userId);
   }
 
   @Delete(':id')
@@ -36,7 +39,7 @@ export class ReservationsController {
     @Param('id', new ParseIntPipe()) id: number,
     @Req() req,
   ): Promise<Reservation | null> {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     return this.reservationsService.delete(id, userId);
   }
@@ -53,7 +56,7 @@ export class ReservationsController {
     @Req() req,
     @Query() query: ListItemsDto,
   ): Promise<ListReservations> {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     return this.reservationsService.listForUser({ ...query, userId });
   }
@@ -64,7 +67,7 @@ export class ReservationsController {
     @Body() updateStatusDto: UpdateReservationStatusDto,
     @Req() req,
   ): Promise<Reservation> {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     return this.reservationsService.updateStatus(
       id,

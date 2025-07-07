@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { Reservation } from '@prisma/client';
 
 import { PrismaService } from '../prisma';
@@ -11,12 +15,31 @@ import { ListReservations, ReservationStatus } from './interfaces';
 export class ReservationsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(reservation: CreateReservationDto): Promise<Reservation> {
-    return this.prisma.reservation.create({ data: reservation });
+  async create(
+    reservation: CreateReservationDto,
+    userId: number,
+  ): Promise<Reservation> {
+    const existingReservation = await this.prisma.reservation.findFirst({
+      where: {
+        bookId: reservation.bookId,
+        userId: userId,
+        status: {
+          in: [ReservationStatus.Pending, ReservationStatus.Approved],
+        },
+      },
+    });
+
+    if (existingReservation) {
+      throw new ConflictException(
+        'You already have an active reservation for this book',
+      );
+    }
+
+    return this.prisma.reservation.create({ data: { ...reservation, userId } });
   }
 
   async delete(id: number, userId: number): Promise<Reservation | null> {
-    const reservation = await this.prisma.reservation.findUnique({
+    const reservation = await this.prisma.reservation.findFirst({
       where: {
         id,
         userId,
@@ -30,7 +53,6 @@ export class ReservationsService {
     return this.prisma.reservation.delete({
       where: {
         id,
-        userId,
       },
     });
   }

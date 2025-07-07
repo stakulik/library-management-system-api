@@ -129,6 +129,10 @@ export class AuthService {
 
       return result;
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new InternalServerErrorException();
     }
   }

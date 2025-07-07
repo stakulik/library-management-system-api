@@ -158,7 +158,7 @@ timestamps
    docker-compose up -d
    
    # Run migrations
-   yarn migrate
+   yarn db:migrate
    
    # Seed database (optional)
    yarn db:seed
@@ -209,8 +209,8 @@ yarn test:db:recreate
 
 ```bash
 # Database operations
-yarn migrate              # Run database migrations
-yarn migrate:reset        # Reset database
+yarn db:migrate           # Run database migrations
+yarn db:migrate:reset     # Reset database
 yarn db:seed              # Seed database with sample data
 
 # Development

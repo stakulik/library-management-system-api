@@ -42,7 +42,11 @@ export class UsersService {
       return null;
     }
 
-    return this.prisma.user.delete({ where: { id } });
+    return this.prisma.$transaction(async (tx) => {
+      await tx.reservation.deleteMany({ where: { userId: id } });
+
+      return tx.user.delete({ where: { id } });
+    });
   }
 
   async findByEmail(
