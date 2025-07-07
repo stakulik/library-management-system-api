@@ -147,7 +147,7 @@ describe('UsersController', () => {
     });
 
     it('should handle pagination parameters', async () => {
-      const users = await Promise.all(
+      await Promise.all(
         Array.from({ length: 5 }, () =>
           prismaService.user.create({
             data: userFactory.build(),

@@ -55,12 +55,12 @@ describe('ReservationsController', () => {
   describe('#create', () => {
     it('should create a reservation', async () => {
       const createReservationDto: CreateReservationDto = {
-        dueDate: faker.date.future(),
+        dueDate: faker.date.future().toISOString(),
         bookId: book.id,
-        userId: user.id,
       };
 
-      const result = await controller.create(createReservationDto);
+      const mockRequest = { user: { userId: user.id } };
+      const result = await controller.create(createReservationDto, mockRequest);
 
       expect(result).toBeDefined();
       expect(result.id).toBeDefined();
@@ -75,25 +75,27 @@ describe('ReservationsController', () => {
     it('should call ReservationsService.create with correct parameters', async () => {
       const createSpy = jest.spyOn(reservationsService, 'create');
       const createReservationDto: CreateReservationDto = {
-        dueDate: faker.date.future(),
+        dueDate: faker.date.future().toISOString(),
         bookId: book.id,
-        userId: user.id,
       };
 
-      await controller.create(createReservationDto);
+      const mockRequest = { user: { userId: user.id } };
+      await controller.create(createReservationDto, mockRequest);
 
-      expect(createSpy).toHaveBeenCalledWith(createReservationDto);
+      expect(createSpy).toHaveBeenCalledWith(createReservationDto, user.id);
     });
 
     describe('when wrong data supplied', () => {
       it('should throw an error', async () => {
         const createReservationDto: CreateReservationDto = {
-          dueDate: faker.date.future(),
+          dueDate: faker.date.future().toISOString(),
           bookId: faker.number.int({ min: 1000, max: 9999 }),
-          userId: user.id,
         };
 
-        await expect(controller.create(createReservationDto)).rejects.toThrow();
+        const mockRequest = { user: { userId: user.id } };
+        await expect(
+          controller.create(createReservationDto, mockRequest),
+        ).rejects.toThrow();
       });
     });
   });
@@ -102,14 +104,14 @@ describe('ReservationsController', () => {
     it('should delete a reservation', async () => {
       const reservation = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.future(),
+          dueDate: faker.date.future().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
       });
 
       const mockRequest = {
-        user: { id: user.id },
+        user: { userId: user.id },
       };
 
       const result = await controller.delete(reservation.id, mockRequest);
@@ -127,7 +129,7 @@ describe('ReservationsController', () => {
       const deleteSpy = jest.spyOn(reservationsService, 'delete');
       const reservationId = faker.number.int({ min: 1, max: 1000 });
       const mockRequest = {
-        user: { id: user.id },
+        user: { userId: user.id },
       };
 
       await controller.delete(reservationId, mockRequest);
@@ -143,14 +145,14 @@ describe('ReservationsController', () => {
 
         const reservation = await prismaService.reservation.create({
           data: {
-            dueDate: faker.date.future(),
+            dueDate: faker.date.future().toISOString(),
             bookId: book.id,
             userId: otherUser.id,
           },
         });
 
         const mockRequest = {
-          user: { id: user.id },
+          user: { userId: user.id },
         };
 
         const result = await controller.delete(reservation.id, mockRequest);
@@ -169,7 +171,7 @@ describe('ReservationsController', () => {
     it('should return paginated list of all reservations', async () => {
       const reservation1 = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.future(),
+          dueDate: faker.date.future().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -177,7 +179,7 @@ describe('ReservationsController', () => {
 
       const reservation2 = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.future(),
+          dueDate: faker.date.future().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -236,7 +238,7 @@ describe('ReservationsController', () => {
 
       const userReservation = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.future(),
+          dueDate: faker.date.future().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -244,14 +246,14 @@ describe('ReservationsController', () => {
 
       await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.future(),
+          dueDate: faker.date.future().toISOString(),
           bookId: book.id,
           userId: otherUser.id,
         },
       });
 
       const mockRequest = {
-        user: { id: user.id },
+        user: { userId: user.id },
       };
 
       const queryDto = {
@@ -270,7 +272,7 @@ describe('ReservationsController', () => {
     it('should call ReservationsService.listForUser with correct parameters', async () => {
       const listForUserSpy = jest.spyOn(reservationsService, 'listForUser');
       const mockRequest = {
-        user: { id: user.id },
+        user: { userId: user.id },
       };
 
       const queryDto = {
@@ -289,7 +291,7 @@ describe('ReservationsController', () => {
     describe('when user has no reservations', () => {
       it('should return empty list', async () => {
         const mockRequest = {
-          user: { id: user.id },
+          user: { userId: user.id },
         };
 
         const queryDto = {
@@ -309,7 +311,7 @@ describe('ReservationsController', () => {
     it('should update reservation status when it belongs to user', async () => {
       const reservation = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.future(),
+          dueDate: faker.date.future().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -320,7 +322,7 @@ describe('ReservationsController', () => {
       };
 
       const mockRequest = {
-        user: { id: user.id },
+        user: { userId: user.id },
       };
 
       const result = await controller.updateStatus(
@@ -341,7 +343,7 @@ describe('ReservationsController', () => {
         status: ReservationStatusEnum.Rejected,
       };
       const mockRequest = {
-        user: { id: user.id },
+        user: { userId: user.id },
       };
 
       try {
@@ -369,7 +371,7 @@ describe('ReservationsController', () => {
 
         const reservation = await prismaService.reservation.create({
           data: {
-            dueDate: faker.date.future(),
+            dueDate: faker.date.future().toISOString(),
             bookId: book.id,
             userId: otherUser.id,
           },
@@ -380,7 +382,7 @@ describe('ReservationsController', () => {
         };
 
         const mockRequest = {
-          user: { id: user.id },
+          user: { userId: user.id },
         };
 
         await expect(
@@ -398,7 +400,7 @@ describe('ReservationsController', () => {
         };
 
         const mockRequest = {
-          user: { id: user.id },
+          user: { userId: user.id },
         };
 
         await expect(

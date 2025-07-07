@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException } from '@nestjs/common';
+import { ConflictException, ForbiddenException } from '@nestjs/common';
 import { faker } from '@faker-js/faker';
 import { Author, Book, ReservationStatus, User } from '@prisma/client';
 
@@ -51,17 +51,16 @@ describe('ReservationsService', () => {
   describe('#create', () => {
     it('should create a reservation', async () => {
       const createReservationDto: CreateReservationDto = {
-        dueDate: faker.date.recent(),
+        dueDate: faker.date.recent().toISOString(),
         bookId: book.id,
-        userId: user.id,
       };
 
-      const result = await service.create(createReservationDto);
+      const result = await service.create(createReservationDto, user.id);
 
       expect(result.id).toBeDefined();
       expect(result.bookId).toBe(book.id);
       expect(result.userId).toBe(user.id);
-      expect(result.dueDate).toEqual(createReservationDto.dueDate);
+      expect(result.dueDate).toEqual(new Date(createReservationDto.dueDate));
       expect(result.status).toBe(ReservationStatus.PENDING);
 
       const reservationsAmount = await prismaService.reservation.count();
@@ -71,12 +70,109 @@ describe('ReservationsService', () => {
     describe('when wrong data supplied', () => {
       it('should throw an error', async () => {
         const createReservationDto: CreateReservationDto = {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: faker.number.int({ min: 1000, max: 9999 }),
-          userId: user.id,
         };
 
-        await expect(service.create(createReservationDto)).rejects.toThrow();
+        await expect(
+          service.create(createReservationDto, user.id),
+        ).rejects.toThrow();
+      });
+    });
+
+    describe('when user already has active reservation for the book', () => {
+      it('should throw ConflictException for PENDING reservation', async () => {
+        await prismaService.reservation.create({
+          data: {
+            dueDate: faker.date.recent().toISOString(),
+            bookId: book.id,
+            userId: user.id,
+            status: ReservationStatus.PENDING,
+          },
+        });
+
+        const createReservationDto: CreateReservationDto = {
+          dueDate: faker.date.recent().toISOString(),
+          bookId: book.id,
+        };
+
+        await expect(
+          service.create(createReservationDto, user.id),
+        ).rejects.toThrow(
+          new ConflictException(
+            'You already have an active reservation for this book',
+          ),
+        );
+      });
+
+      it('should throw ConflictException for APPROVED reservation', async () => {
+        await prismaService.reservation.create({
+          data: {
+            dueDate: faker.date.recent().toISOString(),
+            bookId: book.id,
+            userId: user.id,
+            status: ReservationStatus.APPROVED,
+          },
+        });
+
+        const createReservationDto: CreateReservationDto = {
+          dueDate: faker.date.recent().toISOString(),
+          bookId: book.id,
+        };
+
+        await expect(
+          service.create(createReservationDto, user.id),
+        ).rejects.toThrow(
+          new ConflictException(
+            'You already have an active reservation for this book',
+          ),
+        );
+      });
+
+      it('should allow creating reservation when existing is REJECTED', async () => {
+        await prismaService.reservation.create({
+          data: {
+            dueDate: faker.date.recent().toISOString(),
+            bookId: book.id,
+            userId: user.id,
+            status: ReservationStatus.REJECTED,
+          },
+        });
+
+        const createReservationDto: CreateReservationDto = {
+          dueDate: faker.date.recent().toISOString(),
+          bookId: book.id,
+        };
+
+        const result = await service.create(createReservationDto, user.id);
+
+        expect(result.id).toBeDefined();
+        expect(result.bookId).toBe(book.id);
+        expect(result.userId).toBe(user.id);
+        expect(result.status).toBe(ReservationStatus.PENDING);
+      });
+
+      it('should allow creating reservation when existing is RETURNED', async () => {
+        await prismaService.reservation.create({
+          data: {
+            dueDate: faker.date.recent().toISOString(),
+            bookId: book.id,
+            userId: user.id,
+            status: ReservationStatus.RETURNED,
+          },
+        });
+
+        const createReservationDto: CreateReservationDto = {
+          dueDate: faker.date.recent().toISOString(),
+          bookId: book.id,
+        };
+
+        const result = await service.create(createReservationDto, user.id);
+
+        expect(result.id).toBeDefined();
+        expect(result.bookId).toBe(book.id);
+        expect(result.userId).toBe(user.id);
+        expect(result.status).toBe(ReservationStatus.PENDING);
       });
     });
   });
@@ -85,7 +181,7 @@ describe('ReservationsService', () => {
     it('should delete a reservation', async () => {
       const reservation = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -109,7 +205,7 @@ describe('ReservationsService', () => {
 
         const reservation = await prismaService.reservation.create({
           data: {
-            dueDate: faker.date.recent(),
+            dueDate: faker.date.recent().toISOString(),
             bookId: book.id,
             userId: otherUser.id,
           },
@@ -131,7 +227,7 @@ describe('ReservationsService', () => {
     it('should return reservation', async () => {
       const reservation = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -155,7 +251,7 @@ describe('ReservationsService', () => {
     it('should list all reservations with pagination', async () => {
       const reservation1 = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -163,7 +259,7 @@ describe('ReservationsService', () => {
 
       const reservation2 = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -184,14 +280,14 @@ describe('ReservationsService', () => {
     it('should list reservations for a specific user', async () => {
       const userReservation1 = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
       });
       const userReservation2 = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -203,7 +299,7 @@ describe('ReservationsService', () => {
 
       const otherUserReservation = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: book.id,
           userId: otherUser.id,
         },
@@ -225,7 +321,7 @@ describe('ReservationsService', () => {
     it('should update reservation status', async () => {
       const reservation = await prismaService.reservation.create({
         data: {
-          dueDate: faker.date.recent(),
+          dueDate: faker.date.recent().toISOString(),
           bookId: book.id,
           userId: user.id,
         },
@@ -263,7 +359,7 @@ describe('ReservationsService', () => {
 
         const reservation = await prismaService.reservation.create({
           data: {
-            dueDate: faker.date.recent(),
+            dueDate: faker.date.recent().toISOString(),
             bookId: book.id,
             userId: otherUser.id,
           },

@@ -1,9 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  ConflictException,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
 
@@ -173,7 +169,7 @@ describe('AuthService', () => {
         };
 
         await expect(service.refreshTokens(refreshTokensDto)).rejects.toThrow(
-          InternalServerErrorException,
+          new UnauthorizedException('Access denied'),
         );
       });
     });
@@ -197,7 +193,7 @@ describe('AuthService', () => {
         };
 
         await expect(service.refreshTokens(refreshTokensDto)).rejects.toThrow(
-          InternalServerErrorException,
+          new UnauthorizedException('Access denied'),
         );
       });
     });
